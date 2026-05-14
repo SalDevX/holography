@@ -1,0 +1,44 @@
+{
+  "name": "holography",
+  "version": "1.0.1",
+  "description": "Agent framework scaffolder for Claude Code — wires dispatcher, validator, meta-controller, memory into any project",
+  "bin": {
+    "holography": "cli.js"
+  },
+  "main": "./cli.js",
+  "files": [
+    "cli.js",
+    "README.md",
+    "templates.json",
+    "bootstrap.sh"
+  ],
+  "scripts": {
+    "test": "node cli.js --help"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "agent",
+    "llm",
+    "scaffold",
+    "ai-agent",
+    "dispatcher",
+    "validator",
+    "meta-controller"
+  ],
+  "author": "SalDevX",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalDevX/holography.git"
+  },
+  "homepage": "https://github.com/SalDevX/holography#readme",
+  "bugs": {
+    "url": "https://github.com/SalDevX/holography/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
