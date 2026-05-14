@@ -24,9 +24,21 @@ Holography installs the infrastructure that survives restarts: memory files load
 
 ## The non-obvious part: god nodes
 
-Not all functions are equally dangerous to change. graphify runs AST analysis and produces edge counts and betweenness centrality scores. `Config` in reel-engine looks like a settings dataclass — you add a field for a new vertical, rename an attribute, change a default. It has 119 edges and spans 9 communities: pipeline execution, clip fetching, audio sync, keyword generation, video assembly, YouTube publishing, Instagram posting, state tracking, and LLM calls. A rename of a single attribute propagates silently through every stage that reads it. Without the graph, you ship the rename, test the happy path once, and discover three downstream stages were still reading the old key.
+reel-engine is a content pipeline: FFmpeg video assembly, LLM script generation, beat sync, publishing to YouTube and Instagram, and SQLite state tracking — 60+ files, thousands of lines.
 
-Holography injects these nodes into Claude's context before it writes a single line, on every file access.
+Open a fresh session, and an agent sees files — not topology.
+
+`Config` looks harmless: just a settings dataclass.
+
+The graph says otherwise: 119 edges across 9 communities.
+
+Every stage depends on it — clip fetching, audio sync, prompt generation, publishing, state tracking.
+
+Rename `cfg.max_clip_duration` to `cfg.clip_duration_max`, and four pipeline stages silently fall back to defaults. No exception. No failed test. Just incorrect video lengths shipped downstream.
+
+Without the graph, an agent would never know `Config` is a god node.
+
+Holography injects that structural risk into context before a single line is edited.
 
 ---
 
