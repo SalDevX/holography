@@ -838,10 +838,10 @@ function _writeClaudeCommands(root) {
   fs.mkdirSync(commandsDir, { recursive: true });
 
   const commands = {
-    "memory-bootstrapper.md": "Run the memory-bootstrapper agent from agents/memory-bootstrapper.prompt — fills MEMORY.md with human context (~2 min · 5 questions)",
-    "god-node-hunter.md":     "Run the god-node-hunter agent from agents/god-node-hunter.prompt — identifies high-risk nodes from graphify-out/graph.json",
-    "framework-auditor.md":   "Run the framework-auditor agent from agents/framework-auditor.prompt — maps all files and functions, updates MEMORY_MAP.md",
-    "memory-keeper.md":       "Run the memory-keeper agent from agents/memory-keeper.prompt — syncs MEMORY.md and MEMORY_MAP.md after recent changes",
+    "memory-bootstrapper.md": "⏳ Run after init — fills MEMORY.md + shapes agents with your project context",
+    "god-node-hunter.md":     "Re-maps god nodes from graphify graph — run after big refactors",
+    "framework-auditor.md":   "Re-maps all files + functions into MEMORY_MAP.md — run after big refactors",
+    "memory-keeper.md":       "Syncs MEMORY.md + MEMORY_MAP.md from recent changes — run any time",
   };
 
   for (const [fname, body] of Object.entries(commands)) {
