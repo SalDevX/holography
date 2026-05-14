@@ -50,6 +50,7 @@
 
 | Date | Commit | What |
 |------|--------|------|
+| 2026-05-14 | 2360005 | npm/README.md deleted (609 lines); AGENTS.md routing table: added `Edit docs/ (6 files) → agents/memory-keeper.prompt`; MEMORY_MAP.md Community 7 backfilled for docs/ |
 | 2026-05-14 | 0397f07 | README.md cut to ~80 lines; full content split into 6 new docs/ pages: architecture.md, how-it-works.md, examples.md, extending.md, cli.md, philosophy.md (includes known tradeoffs section) |
 | 2026-05-14 | c4e49fb | .claude/settings.local.json: added allowlist entry `git -C ... add npm/cli.js npm/package.json npm/templates.json` to support /commit slash command workflow without permission prompts |
 | 2026-05-14 | 9a44e52 | npm/cli.js: added /commit slash command template to _writeClaudeCommands(); uses context-only commit (no git reads); bin/commit -m "<summary>"; installed via init + updated via update; bump 1.0.28→1.0.29 |
