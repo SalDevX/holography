@@ -69,6 +69,7 @@ ROUTE:
 | `(root)/` (.js, 1 files) | @install-engineer → `agents/install-engineer.prompt` |
 | `npm/` (.js, 1 files) | @cli-engineer → `agents/cli-engineer.prompt` |
 | `tools/` (.py, 2 files) | @tools-engineer → `agents/tools-engineer.prompt` |
+| `templates/bin/` (2 files) | @cli-engineer → `agents/cli-engineer.prompt` |
 
 ---
 

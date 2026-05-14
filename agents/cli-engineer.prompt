@@ -9,6 +9,8 @@
 
 You may ONLY modify:
 npm/cli.js
+templates/bin/commit
+templates/bin/commit-jsx-patch
 
 Cross-agent task: if your change touches files owned by another agent,
 declare it in the ROUTE block before writing anything.

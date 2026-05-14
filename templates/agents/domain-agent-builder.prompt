@@ -236,6 +236,5 @@ Next: review each agent prompt and add project-specific
 COMMON TASKS if the generated ones need refinement.
 
 Commit:
-  git add agents/ AGENTS.md
-  git commit -m 'feat: domain agents — {list agent names}'
+  bin/commit -m 'feat: domain agents — {list agent names}' agents/ AGENTS.md
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
