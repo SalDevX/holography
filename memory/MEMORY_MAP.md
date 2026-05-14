@@ -47,6 +47,17 @@
 |------|---------------|-----------|-------|
 | `npm/cli.js` | `_loadBundledTemplates()`, `_syncConfirm()`, `checkBin()`, `_ensureGit()`, `_runGraphify()`, `_parseGraph()` | YES | |
 
+## Community 7 — docs/
+
+| File | Key functions | God node? | Notes |
+|------|---------------|-----------|-------|
+| `docs/architecture.md` | — | — | Architecture overview; content split from README in 0397f07 |
+| `docs/cli.md` | — | — | CLI reference; content split from README in 0397f07 |
+| `docs/examples.md` | — | — | Usage examples; content split from README in 0397f07 |
+| `docs/extending.md` | — | — | Extension guide; content split from README in 0397f07 |
+| `docs/how-it-works.md` | — | — | Internals walkthrough; content split from README in 0397f07 |
+| `docs/philosophy.md` | — | — | Design rationale + known tradeoffs; content split from README in 0397f07 |
+
 ---
 
 ## Agent System — @memory-keeper

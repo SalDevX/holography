@@ -13,6 +13,7 @@
 | Edit `(root)/` (1 file) | `agents/install-engineer.prompt` |
 | Edit `npm/` (1 file) | `agents/cli-engineer.prompt` |
 | Edit `tools/` (2 files) | `agents/tools-engineer.prompt` |
+| Edit `docs/` (6 files) | `agents/memory-keeper.prompt` |
 | Doc sync after commit / MEMORY.md / MEMORY_MAP.md | `agents/memory-keeper.prompt` |
 | Validate any output before applying to disk | `agents/validator.prompt` |
 | FAIL escalation from any agent — retry loop | `agents/meta-controller.prompt` |

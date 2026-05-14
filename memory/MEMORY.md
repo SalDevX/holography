@@ -50,6 +50,8 @@
 
 | Date | Commit | What |
 |------|--------|------|
+| 2026-05-14 | 0397f07 | README.md cut to ~80 lines; full content split into 6 new docs/ pages: architecture.md, how-it-works.md, examples.md, extending.md, cli.md, philosophy.md (includes known tradeoffs section) |
+| 2026-05-14 | c4e49fb | .claude/settings.local.json: added allowlist entry `git -C ... add npm/cli.js npm/package.json npm/templates.json` to support /commit slash command workflow without permission prompts |
 | 2026-05-14 | 9a44e52 | npm/cli.js: added /commit slash command template to _writeClaudeCommands(); uses context-only commit (no git reads); bin/commit -m "<summary>"; installed via init + updated via update; bump 1.0.28→1.0.29 |
 | 2026-05-14 | 25bb99e | README.md: rendered AGENTS.md routing table and MEMORY_MAP.md example tables as native GitHub tables; removed raw pipe/markdown fences; added ✓ god-node marker; trimmed global invariants to blockquote |
 | 2026-05-14 | 57480af | npm/cli.js: added _writeCommitScript(), _runUpdate(), _mergeDispatcherRoutes(); bin/commit + bin/commit-jsx-patch templates; holography update command; bump 1.0.26; graph: 64 nodes, 97 edges; _runUpdate() new god node (9 edges) |
