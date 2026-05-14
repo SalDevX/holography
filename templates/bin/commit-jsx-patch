@@ -1,0 +1,11 @@
+def build_if_jsx_changed() -> None:
+    r = git("diff", "HEAD", "--name-only", capture=True)
+    changed = set(r.stdout.splitlines())
+    jsx_files = {"desktop/app.jsx", "mobile/app.jsx"}
+    if not changed & jsx_files:
+        return
+    print_section("BUILD (JSX changed)")
+    r = run([str(PROJECT_ROOT / "bin" / "build")])
+    if r.returncode != 0:
+        print("[commit] bin/build failed — aborting commit", file=sys.stderr)
+        sys.exit(1)

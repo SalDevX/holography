@@ -9,6 +9,9 @@
  * Commands:
  *   npx holography init            — scaffold the framework
  *   npx holography init --dry-run  — preview, no writes
+ *   npx holography update          — upgrade infrastructure, never touch user files
+ *   npx holography update --dry-run
+ *   npx holography upgrade         — alias for update
  *   npx holography clean           — remove everything holography installed
  *   npx holography uninstall       — alias for clean
  *   npx holography --help
@@ -43,11 +46,14 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
 holography v${PKG.version} — Claude Code agent framework installer
 
 Usage:
-  npx holography init            Scaffold a project-aware agent framework
-  npx holography init --dry-run  Preview without writing anything
-  npx holography clean           Remove everything holography installed
-  npx holography --help          Show this message
-  npx holography --version       Show version
+  npx holography init                 Scaffold a project-aware agent framework
+  npx holography init --dry-run       Preview without writing anything
+  npx holography update               Safe upgrade — updates infrastructure only
+  npx holography update --dry-run     Preview what update would change
+  npx holography upgrade              Alias for update
+  npx holography clean                Remove everything holography installed
+  npx holography --help               Show this message
+  npx holography --version            Show version
 
 What 'npx holography init' does:
   1. Ensure git repo exists (git init if missing)
@@ -85,6 +91,13 @@ if (command === "clean" || command === "uninstall") {
     console.log("Cancelled."); process.exit(0);
   }
   _runClean(root);
+  process.exit(0);
+}
+
+if (command === "update" || command === "upgrade") {
+  const root    = process.cwd();
+  const dryRun  = process.argv.includes("--dry-run");
+  _runUpdate(root, dryRun);
   process.exit(0);
 }
 
@@ -199,7 +212,7 @@ if (dryRun) {
   console.log("      [dry-run] would write: tools/validator.py tools/meta_controller.py");
   console.log("      [dry-run] would write: .claude/settings.json (real god nodes injected)");
   console.log("      [dry-run] would write: .claude/commands/ (4 slash commands: /memory-bootstrapper /god-node-hunter /framework-auditor /memory-keeper)");
-  console.log("      [dry-run] would install: bin/meta-controller .git/hooks/post-commit");
+  console.log("      [dry-run] would install: bin/meta-controller bin/commit .git/hooks/post-commit");
 } else {
   // Directories
   for (const d of ["agents", "memory", "bin", "logs", "tests", "tools", "docs/setup"]) {
@@ -232,6 +245,9 @@ if (dryRun) {
   // .claude/commands/ — slash command shortcuts for Claude Code
   _writeClaudeCommands(projectRoot);
   console.log(`      .claude/commands/ — /memory-bootstrapper /god-node-hunter /framework-auditor /memory-keeper`);
+
+  // bin/commit — zero-API commit wrapper with validator gate
+  _writeCommitScript(projectRoot, stack, bundle);
 }
 
 // ---------------------------------------------------------------------------
@@ -841,7 +857,7 @@ function _generateClaudeSettings(root, godNodes) {
 // ---------------------------------------------------------------------------
 // .claude/commands/ — slash command shortcuts for Claude Code
 // ---------------------------------------------------------------------------
-function _writeClaudeCommands(root) {
+function _writeClaudeCommands(root, force = false) {
   const commandsDir = path.join(root, ".claude", "commands");
   fs.mkdirSync(commandsDir, { recursive: true });
 
@@ -855,7 +871,205 @@ function _writeClaudeCommands(root) {
 
   for (const [fname, body] of Object.entries(commands)) {
     const dest = path.join(commandsDir, fname);
-    if (!fs.existsSync(dest)) fs.writeFileSync(dest, body);
+    if (force || !fs.existsSync(dest)) fs.writeFileSync(dest, body);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Update — safe upgrade: overwrite infrastructure, never touch user files
+// ---------------------------------------------------------------------------
+
+function _mergeDispatcherRoutes(dispatcherPath, graph, dryRun) {
+  const current  = fs.readFileSync(dispatcherPath, "utf8");
+  const fileMap  = graph ? graph.fileMap : {};
+  const dirGroups = _groupByDir(Object.keys(fileMap));
+
+  let content = current;
+  let added   = 0;
+
+  for (const [dir, files] of Object.entries(dirGroups).sort(([a], [b]) => a.localeCompare(b))) {
+    if (content.includes(`\`${dir}/\``)) continue;
+    const exts   = [...new Set(files.map(f => path.extname(f)).filter(Boolean))].slice(0, 3).join(", ");
+    const newRow = `| \`${dir}/\` (${exts || "misc"}, ${files.length} files) | @domain-agent |`;
+    // Append after the last pipe-prefixed line in the file
+    const lines = content.split("\n");
+    let lastPipe = -1;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (lines[i].trimStart().startsWith("|")) { lastPipe = i; break; }
+    }
+    if (lastPipe >= 0) lines.splice(lastPipe + 1, 0, newRow);
+    else               lines.push(newRow);
+    content = lines.join("\n");
+    added++;
+  }
+
+  if (!dryRun && added > 0) fs.writeFileSync(dispatcherPath, content);
+  return { added };
+}
+
+function _runUpdate(root, dryRun) {
+  const bundle = _loadBundledTemplates();
+  if (!bundle) { console.error("ERROR: templates.json not found — cannot update"); process.exit(1); }
+
+  const tpls  = bundle.templates || {};
+  const tools = bundle.tools    || {};
+  const stack = _detectStack(root, null);
+  const graph = _parseGraph(root);
+  const projectName = path.basename(root);
+  const date  = new Date().toISOString().slice(0, 10);
+  const ctx   = _buildContext(projectName, date, stack, graph, root, bundle);
+
+  const updated = [];
+  const skipped = [];
+
+  // ── ALWAYS OVERWRITE: tools/
+  for (const [src, dst] of [
+    [tools["validator.py"],       "tools/validator.py"],
+    [tools["meta_controller.py"], "tools/meta_controller.py"],
+  ]) {
+    if (!src) continue;
+    if (!dryRun) {
+      fs.mkdirSync(path.join(root, "tools"), { recursive: true });
+      fs.writeFileSync(path.join(root, dst), src);
+    }
+    updated.push(dst);
+  }
+
+  // ── ALWAYS OVERWRITE: bootstrap agents
+  const bootstrapAgentFiles = [
+    [tpls["agents/validator.prompt"],            "agents/validator.prompt"],
+    [tpls["agents/meta-controller.prompt"],      "agents/meta-controller.prompt"],
+    [tpls["agents/memory-keeper.prompt"],        "agents/memory-keeper.prompt"],
+    [tpls["agents/framework-auditor.prompt"],    "agents/framework-auditor.prompt"],
+    [tpls["agents/memory-bootstrapper.prompt"],  "agents/memory-bootstrapper.prompt"],
+    [tpls["agents/stack-detector.prompt"],       "agents/stack-detector.prompt"],
+    [tpls["agents/god-node-hunter.prompt"],      "agents/god-node-hunter.prompt"],
+    [tpls["agents/domain-agent-builder.prompt"], "agents/domain-agent-builder.prompt"],
+    [tpls["agents/domain-agent.prompt.example"],"agents/domain-agent.prompt.example"],
+  ];
+  for (const [src, dst] of bootstrapAgentFiles) {
+    if (!src) continue;
+    if (!dryRun) {
+      fs.mkdirSync(path.join(root, "agents"), { recursive: true });
+      fs.writeFileSync(path.join(root, dst), _applyContext(src, ctx));
+    }
+    updated.push(dst);
+  }
+
+  // ── ADDITIVE ONLY: agents/dispatcher.prompt routing table
+  const dispatcherPath = path.join(root, "agents", "dispatcher.prompt");
+  if (tpls["agents/dispatcher.prompt"]) {
+    if (fs.existsSync(dispatcherPath)) {
+      const result = _mergeDispatcherRoutes(dispatcherPath, graph, dryRun);
+      updated.push(result.added > 0
+        ? `agents/dispatcher.prompt — ${result.added} new route${result.added !== 1 ? "s" : ""} added`
+        : "agents/dispatcher.prompt — routing table up to date");
+    } else {
+      if (!dryRun) {
+        fs.mkdirSync(path.join(root, "agents"), { recursive: true });
+        fs.writeFileSync(dispatcherPath, _applyContext(tpls["agents/dispatcher.prompt"], ctx));
+      }
+      updated.push("agents/dispatcher.prompt — created");
+    }
+  }
+
+  // ── ALWAYS OVERWRITE: .claude/commands/ (force)
+  if (!dryRun) _writeClaudeCommands(root, true);
+  const cmdDir   = path.join(root, ".claude", "commands");
+  const cmdCount = !dryRun && fs.existsSync(cmdDir) ? fs.readdirSync(cmdDir).length : 5;
+  updated.push(`.claude/commands/ (${cmdCount} files)`);
+
+  // ── ALWAYS OVERWRITE: bin/meta-controller + .git/hooks/post-commit via bootstrap.sh
+  const bootstrapSh = _findBootstrapSh();
+  if (bootstrapSh) {
+    if (!dryRun) {
+      for (const f of ["bin/meta-controller", ".git/hooks/post-commit"]) {
+        try { const p = path.join(root, f); if (fs.existsSync(p)) fs.rmSync(p); } catch {}
+      }
+      spawnSync("bash", [bootstrapSh], {
+        encoding: "utf8", cwd: root, stdio: "pipe", env: { ...process.env },
+      });
+    }
+    updated.push("bin/meta-controller");
+    updated.push(".git/hooks/post-commit");
+  }
+
+  // ── ALWAYS OVERWRITE: bin/commit (universal template, no JSX prompt on update)
+  if (tpls["bin/commit"]) {
+    if (!dryRun) {
+      const dest = path.join(root, "bin", "commit");
+      fs.mkdirSync(path.join(root, "bin"), { recursive: true });
+      fs.writeFileSync(dest, tpls["bin/commit"]);
+      try { fs.chmodSync(dest, 0o755); } catch {}
+    }
+    updated.push("bin/commit");
+  }
+
+  // ── NEVER OVERWRITE: collect skipped user-owned files
+  for (const f of ["CLAUDE.md", "AGENTS.md", "memory/MEMORY.md", "memory/MEMORY_MAP.md"]) {
+    if (fs.existsSync(path.join(root, f))) skipped.push(f);
+  }
+  const bootstrapAgentNames = new Set([
+    "dispatcher.prompt", "validator.prompt", "meta-controller.prompt",
+    "memory-keeper.prompt", "framework-auditor.prompt", "memory-bootstrapper.prompt",
+    "stack-detector.prompt", "god-node-hunter.prompt", "domain-agent-builder.prompt",
+    "domain-agent.prompt.example",
+  ]);
+  const agentsDir = path.join(root, "agents");
+  if (fs.existsSync(agentsDir)) {
+    for (const f of fs.readdirSync(agentsDir).sort()) {
+      if (!bootstrapAgentNames.has(f)) skipped.push(`agents/${f}`);
+    }
+  }
+
+  // ── Summary
+  const bar = "━".repeat(48);
+  console.log(`\n${bar}`);
+  console.log(`  holography update — v${PKG.version}${dryRun ? " (DRY RUN)" : ""}`);
+  console.log(`\n  ${dryRun ? "would update" : "updated"}:`);
+  for (const u of updated) console.log(`    ${u}`);
+  if (skipped.length) {
+    console.log(`\n  skipped (user-owned — not touched):`);
+    for (const s of skipped) console.log(`    ${s}`);
+  }
+  console.log(`\n  No re-initialization needed.`);
+  console.log(`  Your agents, memory, and routing are untouched.`);
+  console.log(`${bar}\n`);
+}
+
+// ---------------------------------------------------------------------------
+// Commit script — write bin/commit with optional JSX build patch
+// ---------------------------------------------------------------------------
+function _writeCommitScript(root, stack, bundle) {
+  const tpls = bundle.templates || {};
+  let content = tpls["bin/commit"];
+  if (!content) return;
+
+  const PLACEHOLDER = "# ── pre-commit build step (injected by holography if JSX/React detected)";
+  const hasJsx = stack.frameworks.includes("react") || stack.stackType.startsWith("react");
+
+  if (hasJsx) {
+    process.stdout.write("      Include auto-build step in bin/commit? (runs npm run build on .jsx changes) [Y/n] ");
+    const buf = Buffer.alloc(8);
+    const n = fs.readSync(0, buf, 0, 8, null);
+    const answer = buf.slice(0, n).toString().trim().toLowerCase();
+    const includeBuild = answer === "y" || answer === "";
+
+    if (includeBuild) {
+      const patch = (tpls["bin/commit-jsx-patch"] || "").trim();
+      // Inject function definition at module-level placeholder
+      content = content.replace(PLACEHOLDER, patch);
+      // Inject call at indented (main()) placeholder
+      content = content.replace("    " + PLACEHOLDER, "    build_if_jsx_changed()");
+    }
+  }
+
+  const dest = path.join(root, "bin", "commit");
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, content);
+    try { fs.chmodSync(dest, 0o755); } catch {}
+    console.log("      bin/commit — installed");
   }
 }
 

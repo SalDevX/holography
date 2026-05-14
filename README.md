@@ -548,15 +548,25 @@ files inside it).
 ## CLI reference
 
 ```
-npx holography init              Full install (5 steps)
-npx holography init --dry-run    Preview — no files written, no graphify run
-npx holography clean             Remove holography from this project
-npx holography uninstall         Alias for clean
+npx holography init                   Full install (5 steps)
+npx holography init --dry-run         Preview — no files written, no graphify run
+npx holography update                 Safe upgrade — updates infrastructure, never
+                                      touches your agents or memory
+npx holography update --dry-run       Preview what would change
+npx holography upgrade                Alias for update
+npx holography clean                  Remove holography from this project
+npx holography uninstall              Alias for clean
 npx holography --help
 npx holography --version
 ```
 
 ```bash
+# Zero-API commit wrapper (validate → stage → commit → graphify)
+bin/commit -m "your message"
+bin/commit -m "message" tools/file.py js/file.js   # specific files
+bin/commit --all -m "message"                       # stage all including untracked
+bin/commit --skip-validate -m "message"             # bypass validator gate
+
 # Retry loop
 bin/meta-controller --task "your task description"
 bin/meta-controller --task "task" --dry-run      # print retry plans, no claude calls
