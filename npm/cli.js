@@ -211,7 +211,7 @@ if (dryRun) {
   console.log("      [dry-run] would write: memory/MEMORY.md memory/MEMORY_MAP.md (real files + functions)");
   console.log("      [dry-run] would write: tools/validator.py tools/meta_controller.py");
   console.log("      [dry-run] would write: .claude/settings.json (real god nodes injected)");
-  console.log("      [dry-run] would write: .claude/commands/ (4 slash commands: /memory-bootstrapper /god-node-hunter /framework-auditor /memory-keeper)");
+  console.log("      [dry-run] would write: .claude/commands/ (5 slash commands: /memory-bootstrapper /god-node-hunter /framework-auditor /memory-keeper /commit)");
   console.log("      [dry-run] would install: bin/meta-controller bin/commit .git/hooks/post-commit");
 } else {
   // Directories
@@ -244,7 +244,7 @@ if (dryRun) {
 
   // .claude/commands/ — slash command shortcuts for Claude Code
   _writeClaudeCommands(projectRoot);
-  console.log(`      .claude/commands/ — /memory-bootstrapper /god-node-hunter /framework-auditor /memory-keeper`);
+  console.log(`      .claude/commands/ — /memory-bootstrapper /god-node-hunter /framework-auditor /memory-keeper /commit`);
 
   // bin/commit — zero-API commit wrapper with validator gate
   _writeCommitScript(projectRoot, stack, bundle);
@@ -867,6 +867,7 @@ function _writeClaudeCommands(root, force = false) {
     "framework-auditor.md":    "Re-maps all files + functions into MEMORY_MAP.md — run after big refactors",
     "memory-keeper.md":        "Syncs MEMORY.md + MEMORY_MAP.md from recent changes — run any time",
     "domain-agent-builder.md": "Run after /memory-bootstrapper — builds named domain agents from graph communities, creates real file ownership, updates AGENTS.md routing table and dispatcher.prompt",
+    "commit.md":               "Use what's already in context — you know what changed.\nRun: bin/commit -m \"<one-line summary of the work just completed>\"\nNo git status. No git diff. No git log. One Bash tool call only.",
   };
 
   for (const [fname, body] of Object.entries(commands)) {
