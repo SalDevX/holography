@@ -18,7 +18,7 @@ declare it in the ROUTE block before writing anything.
 
 ## KEY RULES
 
-- God nodes in this domain: `MetaController` (tools/meta_controller.py, 5 edges), `files_in_diff()` (tools/validator.py, 4 edges), `_rule_sftp_deploy_logic_gate()` (tools/validator.py, 4 edges), `added_lines()` (tools/validator.py, 3 edges), `_rule_no_direct_data_js_edit()` (tools/validator.py, 3 edges), `_rule_asset_path_consistency()` (tools/validator.py, 3 edges)
+- God nodes in this domain: `MetaController` (tools/meta_controller.py, 5 edges), `files_in_diff()` (tools/validator.py, 4 edges), `_rule_sftp_deploy_logic_gate()` (tools/validator.py, 4 edges), `added_lines()` (tools/validator.py, 3 edges), `_rule_no_direct_data_js_edit()` (tools/validator.py, 3 edges), `_rule_asset_path_consistency()` (tools/validator.py, 3 edges), `_rule_mobile_desktop_parity()` (tools/validator.py, 3 edges), `_load_project_rules()` (tools/validator.py, 3 edges)
 - Never modify files outside AGENT OWNERSHIP without declaring
   cross-agent task in ROUTE block first
 - Run `graphify update .` after every change (zero API cost — AST only)

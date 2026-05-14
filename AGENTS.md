@@ -65,6 +65,8 @@ Graph source: `graphify-out/GRAPH_REPORT.md` · 61 nodes · 85 edges · last run
 | `added_lines()` | 3 | `tools/validator.py` | — | |
 | `_rule_no_direct_data_js_edit()` | 3 | `tools/validator.py` | — | |
 | `_rule_asset_path_consistency()` | 3 | `tools/validator.py` | — | |
+| `_rule_mobile_desktop_parity()` | 3 | `tools/validator.py` | — | |
+| `_load_project_rules()` | 3 | `tools/validator.py` | — | |
 
 ### Critical Path
 
