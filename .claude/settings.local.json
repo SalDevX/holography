@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(graphify --help)",
+      "Bash(git -C /home/craftworkson/dev/holography status)",
+      "Bash(git -C /home/craftworkson/dev/holography diff)",
+      "Bash(git -C /home/craftworkson/dev/holography log --oneline -5)",
+      "Bash(git -C /home/craftworkson/dev/holography add README.md npm/package.json npm/templates.json tools/meta_controller.py tools/validator.py .gitignore npm/cli.js npm/.npmignore templates/agents/domain-agent-builder.prompt)",
+      "Bash(git -C /home/craftworkson/dev/holography status --short)",
+      "Bash(git -C /home/craftworkson/dev/holography add npm/cli.js .gitignore npm/.npmignore)",
+      "Bash(git -C /home/craftworkson/dev/holography diff --cached --name-only)",
+      "Bash(git -C /home/craftworkson/dev/holography log --oneline -6)",
+      "Bash(git -C /home/craftworkson/dev/holography show --stat HEAD)",
+      "Bash(git -C /home/craftworkson/dev/holography diff HEAD -- npm/cli.js .gitignore npm/.npmignore)",
+      "Bash(git -C /home/craftworkson/dev/holography commit -m ' *)",
+      "Bash(node npm/cli.js update --dry-run)",
+      "Bash(node /home/craftworkson/dev/holography/npm/cli.js update --dry-run)",
+      "Bash(git -C /home/craftworkson/dev/holography log --oneline -3)"
+    ]
+  }
+}

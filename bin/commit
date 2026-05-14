@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+"""
+bin/commit — zero-API commit wrapper
+
+Runs the validator, stages, commits, and updates the graph.
+No Claude API calls — fully local, zero cost.
+
+Usage:
+    bin/commit -m "fix cart totals"
+    bin/commit -m "update bridge" tools/fm_bridge.py js/data.js
+    bin/commit                        # prompts for message interactively
+    bin/commit --all -m "message"     # also stage untracked files
+
+Exit codes:  0 = committed  1 = validator FAIL  2 = nothing to commit  3 = usage error
+"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def run(cmd: list[str], *, capture: bool = False, input: str | None = None) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        cmd,
+        capture_output=capture,
+        text=True,
+        input=input,
+        cwd=str(PROJECT_ROOT),
+    )
+
+
+def git(*args: str, capture: bool = False, input: str | None = None) -> subprocess.CompletedProcess:
+    return run(["git"] + list(args), capture=capture, input=input)
+
+
+def print_section(title: str) -> None:
+    print(f"\n── {title} {'─' * max(0, 50 - len(title))}", flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Steps
+# ---------------------------------------------------------------------------
+
+def check_dirty() -> str:
+    """Return the current diff (HEAD vs working tree). Empty string = nothing to commit."""
+    r = git("diff", "HEAD", capture=True)
+    return r.stdout
+
+
+def validate(diff: str) -> bool:
+    print_section("VALIDATOR")
+    r = run(
+        [sys.executable, str(PROJECT_ROOT / "tools" / "validator.py")],
+        capture=False,
+        input=diff,
+    )
+    return r.returncode == 0
+
+
+def stage(files: list[str], all_files: bool) -> int:
+    """Stage files. Returns number of staged changes."""
+    print_section("STAGING")
+    if files:
+        r = git("add", "--", *files)
+    elif all_files:
+        r = git("add", ".")
+    else:
+        r = git("add", "-u")
+
+    if r.returncode != 0:
+        print(f"[commit] git add failed", file=sys.stderr)
+        sys.exit(1)
+
+    r = git("diff", "--cached", "--stat", capture=True)
+    print(r.stdout.rstrip() or "(nothing staged)")
+    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    return len(lines)
+
+
+def commit(message: str) -> bool:
+    print_section("COMMIT")
+    r = git("commit", "-m", message + "\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>")
+    if r.returncode != 0:
+        print("[commit] git commit failed", file=sys.stderr)
+        return False
+    log = git("log", "--oneline", "-1", capture=True)
+    print(log.stdout.rstrip())
+    return True
+
+
+# ── pre-commit build step (injected by holography if JSX/React detected)
+
+
+def graphify_update() -> None:
+    print_section("GRAPHIFY")
+    r = run(["graphify", "update", "."])
+    if r.returncode != 0:
+        print("[commit] graphify update failed (non-fatal)", file=sys.stderr)
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Zero-API commit: validate → stage → commit → graphify",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    p.add_argument("-m", "--message", default="", help="Commit message")
+    p.add_argument("--all", dest="all_files", action="store_true",
+                   help="Stage all files including untracked (git add .)")
+    p.add_argument("files", nargs="*", help="Specific files to stage (default: all tracked changes)")
+    p.add_argument("--skip-validate", action="store_true",
+                   help="Skip validator gate (use only when you know what you're doing)")
+    return p.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+
+    # ── 1. check there's something to commit
+    diff = check_dirty()
+    if not diff.strip():
+        print("[commit] nothing to commit — working tree clean")
+        return 2
+
+    # ── 2. validator gate (runs on full working-tree diff)
+    if not args.skip_validate:
+        passed = validate(diff)
+        if not passed:
+            print("\n[commit] BLOCKED — fix validator errors above before committing", file=sys.stderr)
+            return 1
+    else:
+        print("[commit] WARNING: validator skipped")
+
+    # ── pre-commit build step (injected by holography if JSX/React detected)
+
+    # ── 3. commit message
+    message = args.message.strip()
+    if not message:
+        try:
+            print("\nCommit message (Ctrl-C to abort): ", end="", flush=True)
+            message = input().strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n[commit] aborted")
+            return 3
+    if not message:
+        print("[commit] empty commit message — aborted", file=sys.stderr)
+        return 3
+
+    # ── 4. stage
+    staged = stage(args.files, args.all_files)
+    if staged == 0:
+        print("[commit] nothing staged after git add — aborted", file=sys.stderr)
+        return 2
+
+    # ── 5. commit
+    if not commit(message):
+        return 1
+
+    # ── 6. graphify (AST only, zero API cost)
+    graphify_update()
+
+    print("\n[commit] done ✓")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

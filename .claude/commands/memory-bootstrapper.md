@@ -1,0 +1,1 @@
+⏳ Run after init — fills MEMORY.md with human context (~2 min · 5 questions)

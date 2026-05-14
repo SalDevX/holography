@@ -1,0 +1,1 @@
+Run after /memory-bootstrapper — builds named domain agents from graph communities, creates real file ownership, updates AGENTS.md routing table and dispatcher.prompt

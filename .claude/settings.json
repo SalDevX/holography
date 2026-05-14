@@ -1,0 +1,62 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f graphify-out/graph.json ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"graphify graph loaded. God nodes: _buildContext(), MetaController, files_in_diff(), _rule_sftp_deploy_logic_gate(), _groupByDir(). Read GRAPH_REPORT.md only when tracing unknown cross-file dependencies.\"}}' || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f graphify-out/graph.json ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"graphify graph loaded. God nodes: _buildContext(), MetaController, files_in_diff(), _rule_sftp_deploy_logic_gate(), _groupByDir(). Read GRAPH_REPORT.md only when tracing unknown cross-file dependencies.\"}}' || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"Code modified. After this task: run graphify update ., update memory/MEMORY.md Recent Fixes, update MEMORY_MAP.md if new functions added.\"}}'"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"Code modified. After this task: run graphify update ., update memory/MEMORY.md Recent Fixes, update MEMORY_MAP.md if new functions added.\"}}'"
+          }
+        ]
+      },
+      {
+        "matcher": "Create",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"Code modified. After this task: run graphify update ., update memory/MEMORY.md Recent Fixes, update MEMORY_MAP.md if new functions added.\"}}'"
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"Code modified. After this task: run graphify update ., update memory/MEMORY.md Recent Fixes, update MEMORY_MAP.md if new functions added.\"}}'"
+          }
+        ]
+      }
+    ]
+  }
+}

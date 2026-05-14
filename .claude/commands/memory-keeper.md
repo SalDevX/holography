@@ -1,0 +1,1 @@
+Syncs MEMORY.md + MEMORY_MAP.md from recent changes — run any time
