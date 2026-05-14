@@ -7,12 +7,14 @@
 #   OR: bash tools/agent-framework/tools/bootstrap.sh
 #
 # What it does:
-#   1. Detects project structure
-#   2. Scaffolds agents/, memory/, bin/, logs/, docs/setup/
-#   3. Copies template files with PROJECT_NAME substituted
-#   4. Installs post-commit hook
-#   5. Runs graphify if installed
-#   6. Prints next steps
+#   1. Scaffolds agents/, memory/, bin/, logs/, docs/setup/
+#   2. Installs bin/meta-controller
+#   3. Installs post-commit hook
+#   4. Runs graphify if installed
+#   5. Prints next steps
+#
+# Template files (CLAUDE.md, AGENTS.md, agents/*.prompt, tools/*.py) are
+# written by cli.js from the bundled templates.json — not by this script.
 
 set -euo pipefail
 
@@ -20,10 +22,8 @@ set -euo pipefail
 # Config
 # ---------------------------------------------------------------------------
 
-FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_ROOT="$(pwd)"
 PROJECT_NAME="$(basename "$PROJECT_ROOT")"
-DATE="$(date +%Y-%m-%d)"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -50,7 +50,7 @@ fi
 # Step 1 — Create directory structure
 # ---------------------------------------------------------------------------
 
-log "Step 1/7 — Creating directory structure..."
+log "Step 1/5 — Creating directory structure..."
 mkdir -p \
     "$PROJECT_ROOT/agents" \
     "$PROJECT_ROOT/memory" \
@@ -63,65 +63,10 @@ mkdir -p \
 log "  agents/ memory/ bin/ logs/ tests/ tools/ docs/setup/ — created"
 
 # ---------------------------------------------------------------------------
-# Step 2 — Copy and substitute templates
+# Step 2 — Install bin/meta-controller
 # ---------------------------------------------------------------------------
 
-log "Step 2/7 — Copying templates..."
-
-_render() {
-    local src="$1" dst="$2"
-    sed \
-        -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-        -e "s/{{DATE}}/$DATE/g" \
-        "$src" > "$dst"
-    log "  $dst"
-}
-
-# Core files (only if not already present)
-[ ! -f "$PROJECT_ROOT/CLAUDE.md" ] && \
-    _render "$FRAMEWORK_DIR/templates/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md"
-
-[ ! -f "$PROJECT_ROOT/AGENTS.md" ] && \
-    _render "$FRAMEWORK_DIR/templates/AGENTS.md" "$PROJECT_ROOT/AGENTS.md"
-
-[ ! -f "$PROJECT_ROOT/memory/MEMORY.md" ] && \
-    _render "$FRAMEWORK_DIR/templates/MEMORY.md" "$PROJECT_ROOT/memory/MEMORY.md"
-
-[ ! -f "$PROJECT_ROOT/memory/MEMORY_MAP.md" ] && \
-    _render "$FRAMEWORK_DIR/templates/MEMORY_MAP.md" "$PROJECT_ROOT/memory/MEMORY_MAP.md"
-
-# Agent prompts
-for prompt in dispatcher validator meta-controller memory-keeper \
-              framework-auditor memory-bootstrapper stack-detector god-node-hunter; do
-    src="$FRAMEWORK_DIR/templates/agents/${prompt}.prompt"
-    dst="$PROJECT_ROOT/agents/${prompt}.prompt"
-    [ -f "$src" ] && [ ! -f "$dst" ] && _render "$src" "$dst"
-done
-
-# Copy domain-agent example
-[ ! -f "$PROJECT_ROOT/agents/domain-agent.prompt.example" ] && \
-    cp "$FRAMEWORK_DIR/templates/agents/domain-agent.prompt.example" \
-       "$PROJECT_ROOT/agents/domain-agent.prompt.example"
-
-# ---------------------------------------------------------------------------
-# Step 3 — Copy tools
-# ---------------------------------------------------------------------------
-
-log "Step 3/7 — Installing tools..."
-
-[ ! -f "$PROJECT_ROOT/tools/validator.py" ] && \
-    cp "$FRAMEWORK_DIR/tools/validator.py" "$PROJECT_ROOT/tools/validator.py" && \
-    log "  tools/validator.py"
-
-[ ! -f "$PROJECT_ROOT/tools/meta_controller.py" ] && \
-    cp "$FRAMEWORK_DIR/tools/meta_controller.py" "$PROJECT_ROOT/tools/meta_controller.py" && \
-    log "  tools/meta_controller.py"
-
-# ---------------------------------------------------------------------------
-# Step 4 — Install bin/meta-controller
-# ---------------------------------------------------------------------------
-
-log "Step 4/7 — Installing bin/meta-controller..."
+log "Step 2/5 — Installing bin/meta-controller..."
 if [ ! -f "$PROJECT_ROOT/bin/meta-controller" ]; then
     cat > "$PROJECT_ROOT/bin/meta-controller" << 'BINEOF'
 #!/usr/bin/env python3
@@ -206,7 +151,7 @@ fi
 # Step 5 — Install post-commit hook
 # ---------------------------------------------------------------------------
 
-log "Step 5/7 — Installing post-commit hook..."
+log "Step 3/5 — Installing post-commit hook..."
 if [ -d "$PROJECT_ROOT/.git" ]; then
     cat > "$PROJECT_ROOT/.git/hooks/post-commit" << HOOKEOF
 #!/bin/bash
@@ -232,7 +177,7 @@ fi
 # Step 6 — Run graphify
 # ---------------------------------------------------------------------------
 
-log "Step 6/7 — Running graphify..."
+log "Step 4/5 — Running graphify..."
 if command -v graphify &> /dev/null; then
     cd "$PROJECT_ROOT" && graphify update . 2>&1 | tail -2
     log "  graphify-out/ updated"
@@ -245,7 +190,7 @@ fi
 # Step 7 — Summary
 # ---------------------------------------------------------------------------
 
-log "Step 7/7 — Done."
+log "Step 5/5 — Done."
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  holography installed in: $PROJECT_ROOT"

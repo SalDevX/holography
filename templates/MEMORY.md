@@ -1,7 +1,7 @@
 # {{PROJECT_NAME}} — Claude Memory
 
 **Project:** {{PROJECT_DESCRIPTION}}
-**Owner:** {{OWNER}} · {{LOCATION}} · {{TIMEZONE}}
+**Owner:** {{PROJECT_OWNER}} · {{LOCATION}} · {{TIMEZONE}}
 **Location:** `{{PROJECT_PATH}}`
 **Stack:** {{STACK}}
 **Status:** {{STATUS}}
