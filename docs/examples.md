@@ -86,7 +86,13 @@ holography installed in ~30 seconds. graphify found 141 nodes, 238 edges, 9 comm
   ✅ stack-detector    — done (graph-driven)
   ✅ framework-auditor — done (graph-driven)
   ✅ god-node-hunter   — done (graph-driven)
-  ⏳ memory-bootstrapper — one manual step remaining
+  ⏳ /memory-bootstrapper  Run after init — fills MEMORY.md with     human context (~2 min · 5 questions) (project)
+  ⏳ /domain-agent-builder Run after /memory-bootstrapper — builds named domain agents from graph communities, creates
+                              real ... (project)
+
+
+
+  
 
   Open Claude Code and run:
     /memory-bootstrapper
