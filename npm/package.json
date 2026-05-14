@@ -1,6 +1,6 @@
 {
   "name": "holography",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Agent framework scaffolder for Claude Code — wires dispatcher, validator, meta-controller, memory into any project",
   "bin": {
     "holography": "cli.js"
