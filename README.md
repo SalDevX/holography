@@ -293,67 +293,41 @@ holography installed in ~30 seconds. graphify found 141 nodes, 238 edges, 9 comm
 
 ### AGENTS.md — routing table (auto-generated)
 
-```markdown
-## Routing — which file to read
-
-| Task | Read this file |
-|------|----------------|
+| Task | Agent |
+|------|-------|
 | ALL tasks — entry point (read first) | `agents/dispatcher.prompt` |
-| Edit `desktop/` (2 files) | `agents/domain-agent.prompt.example` |
-| Edit `js/` (6 files) | `agents/domain-agent.prompt.example` |
-| Edit `mobile/` (2 files) | `agents/domain-agent.prompt.example` |
-| Edit `shared/` (1 file) | `agents/domain-agent.prompt.example` |
-| Edit `tools/` (2 files) | `agents/domain-agent.prompt.example` |
-| Doc sync after commit / MEMORY.md / MEMORY_MAP.md | `agents/memory-keeper.prompt` |
-| Validate any output before applying to disk | `agents/validator.prompt` |
-| FAIL escalation from any agent — retry loop | `agents/meta-controller.prompt` |
+| Edit `desktop/` (2 files) | `agents/domain-agent.prompt` |
+| Edit `js/` (6 files) | `agents/domain-agent.prompt` |
+| Edit `mobile/` (2 files) | `agents/domain-agent.prompt` |
+| Edit `shared/` (1 file) | `agents/domain-agent.prompt` |
+| Edit `tools/` (2 files) | `agents/domain-agent.prompt` |
+| Doc sync / MEMORY.md / MEMORY_MAP.md | `agents/memory-keeper.prompt` |
+| Validate output before applying | `agents/validator.prompt` |
+| FAIL escalation — retry loop | `agents/meta-controller.prompt` |
 
-## Global invariants — apply to every task, every agent
-
-**Hard rules — never break:**
-- Never modify god nodes without declaring in task description:
-  `fmt()` (js/form.js, 12 edges), `_run_validator()` (tests/smoke_test.py, 11 edges),
-  `parse_csv_multi_row()` (tools/fm_bridge.py, 10 edges)
-- Run `graphify update .` after every code change (zero API cost — AST only)
-- All tests must pass before merging: `python3 -m pytest tests/ -v`
-- No bare `except:` — always catch specific exception types
-
-## God Nodes — never touch without full cross-agent audit
-
-Graph source: `graphify-out/GRAPH_REPORT.md` · 114 nodes · 199 edges · last run 2026-05-14
-
-| Node | Edges | File | Owner | Notes |
-|------|-------|------|-------|-------|
-| `fmt()` | 12 | `js/form.js` | — | |
-| `_run_validator()` | 11 | `tests/smoke_test.py` | — | |
-| `parse_csv_multi_row()` | 10 | `tools/fm_bridge.py` | — | |
-| `_make_diff()` | 10 | `tests/smoke_test.py` | — | |
-| `parse_csv_single_row()` | 8 | `tools/fm_bridge.py` | — | |
-```
+> God nodes: `fmt()` (12 edges · js/form.js), `_run_validator()` (11 · tests/smoke_test.py), `parse_csv_multi_row()` (10 · tools/fm_bridge.py)
 
 ### MEMORY_MAP.md — community sections (auto-generated)
 
-```markdown
-## Community 3 — desktop/
+**Community 3 — desktop/**
 
-| File | Key functions | God node? | Notes |
-|------|---------------|-----------|-------|
-| `desktop/app.jsx` | `Header()`, `FilterBar()`, `ProductCard()`, `ProductGrid()`, `DetailPanel()`, `BottomBar()` | — | |
-| `js/form.js` | `fmt()`, `handleQty()`, `hasOverStock()`, `recalc()`, `getOrderedItems()`, `validate()` | YES | |
-| `shared/utils.js` | `cleanCatLabel()`, `toggleSet()`, `removeFromSet()`, `deriveShells()`, `deriveStones()` | — | |
+| File | Key functions | God node? |
+|------|---------------|:---------:|
+| `desktop/app.jsx` | `Header()`, `FilterBar()`, `ProductCard()`, `ProductGrid()`, `DetailPanel()`, `BottomBar()` | — |
+| `js/form.js` | `fmt()`, `handleQty()`, `hasOverStock()`, `recalc()`, `getOrderedItems()`, `validate()` | ✓ |
+| `shared/utils.js` | `cleanCatLabel()`, `toggleSet()`, `removeFromSet()`, `deriveShells()`, `deriveStones()` | — |
 
-## Community 5 — mobile/
+**Community 5 — mobile/**
 
-| File | Key functions | God node? | Notes |
-|------|---------------|-----------|-------|
-| `mobile/app.jsx` | `IconGrid()`, `IconBag()`, `FilterSheet()`, `BottomSheet()`, `CatalogView()` | — | |
+| File | Key functions | God node? |
+|------|---------------|:---------:|
+| `mobile/app.jsx` | `IconGrid()`, `IconBag()`, `FilterSheet()`, `BottomSheet()`, `CatalogView()` | — |
 
-## Community 6 — shared/
+**Community 6 — shared/**
 
-| File | Key functions | God node? | Notes |
-|------|---------------|-----------|-------|
-| `shared/utils.js` | `cleanCatLabel()`, `toggleSet()`, `removeFromSet()`, `deriveShells()` | — | |
-```
+| File | Key functions | God node? |
+|------|---------------|:---------:|
+| `shared/utils.js` | `cleanCatLabel()`, `toggleSet()`, `removeFromSet()`, `deriveShells()` | — |
 
 ### .claude/settings.json — god-node-aware hooks (auto-generated)
 
