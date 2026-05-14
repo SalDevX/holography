@@ -102,6 +102,11 @@ const dryRun = process.argv.includes("--dry-run");
 const projectRoot = process.cwd();
 const projectName = path.basename(projectRoot);
 
+const isHolographyDevRepo =
+  projectRoot === __dirname ||
+  projectRoot === path.dirname(__dirname) ||
+  fs.existsSync(path.join(__dirname, '..', 'install.js'));
+
 console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
 console.log(`  holography v${PKG.version}`);
 console.log(`  Installing into: ${projectRoot}`);
@@ -132,12 +137,16 @@ if (dryRun) {
   console.log("      [dry-run] would run: graphify update .");
   console.log("      [dry-run] would parse: graphify-out/graph.json");
 } else {
-  const hasGraphify = checkBin("graphify");
-  if (!hasGraphify) {
-    console.warn("      WARN: graphify not found — install: uv tool install graphifyy");
-    console.warn("      Agents will use static fallback — no dynamic god-node injection.");
+  if (isHolographyDevRepo) {
+    console.log("      [dev] skipping graphify — holography source detected");
   } else {
-    _runGraphify(projectRoot);
+    const hasGraphify = checkBin("graphify");
+    if (!hasGraphify) {
+      console.warn("      WARN: graphify not found — install: uv tool install graphifyy");
+      console.warn("      Agents will use static fallback — no dynamic god-node injection.");
+    } else {
+      _runGraphify(projectRoot);
+    }
   }
   graph = _parseGraph(projectRoot);
   if (graph) {
@@ -232,14 +241,13 @@ console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   holography v${PKG.version} installed in: ${projectRoot}
 ${dryRun ? "\n  DRY RUN complete — no files were written.\n" : ""}
-  ✅ stack-detector    — done (graph-driven)
-  ✅ framework-auditor — done (graph-driven)
-  ✅ god-node-hunter   — done (graph-driven)
-  ⏳ memory-bootstrapper — one manual step remaining
-
-  Open Claude Code in this project and run:
-    "Run the memory-bootstrapper agent"
-  (~2 min · 5 questions · fills MEMORY.md with human context)
+  ✅ stack-detector       — done (graph-driven)
+  ✅ framework-auditor    — done (graph-driven)
+  ✅ god-node-hunter      — done (graph-driven)
+  ⏳ Step 1: Open Claude Code → "Run the memory-bootstrapper agent"
+             (~2 min · 5 questions · fills MEMORY.md with human context)
+  ⏳ Step 2: Open Claude Code → "Run the domain-agent-builder agent"
+             (~5 min · creates named domain agents with real file ownership)
 
   Then commit:
     git add agents/ memory/ CLAUDE.md AGENTS.md bin/ tools/ .claude/
@@ -838,10 +846,11 @@ function _writeClaudeCommands(root) {
   fs.mkdirSync(commandsDir, { recursive: true });
 
   const commands = {
-    "memory-bootstrapper.md": "⏳ Run after init — fills MEMORY.md + shapes agents with your project context",
-    "god-node-hunter.md":     "Re-maps god nodes from graphify graph — run after big refactors",
-    "framework-auditor.md":   "Re-maps all files + functions into MEMORY_MAP.md — run after big refactors",
-    "memory-keeper.md":       "Syncs MEMORY.md + MEMORY_MAP.md from recent changes — run any time",
+    "memory-bootstrapper.md":  "⏳ Run after init — fills MEMORY.md with human context (~2 min · 5 questions)",
+    "god-node-hunter.md":      "Re-maps god nodes from graphify graph — run after big refactors",
+    "framework-auditor.md":    "Re-maps all files + functions into MEMORY_MAP.md — run after big refactors",
+    "memory-keeper.md":        "Syncs MEMORY.md + MEMORY_MAP.md from recent changes — run any time",
+    "domain-agent-builder.md": "Run after /memory-bootstrapper — builds named domain agents from graph communities, creates real file ownership, updates AGENTS.md routing table and dispatcher.prompt",
   };
 
   for (const [fname, body] of Object.entries(commands)) {
