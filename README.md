@@ -173,16 +173,26 @@ The post-commit hook fires. `@memory-keeper` runs. Memory updates from your firs
 After `npx holography init`, these commands are available directly in Claude Code:
 
 ```
-/memory-bootstrapper   ← the one required step after init
-/god-node-hunter       ← re-run any time after big refactors
-/framework-auditor     ← re-map files/functions on demand
-/memory-keeper         ← manual memory sync without a commit
+/memory-bootstrapper     ← required step 1 after init
+/domain-agent-builder    ← required step 2 after memory-bootstrapper
+/god-node-hunter         ← re-run any time after big refactors
+/framework-auditor       ← re-map files/functions on demand
+/memory-keeper           ← manual memory sync without a commit
 ```
 
 They live in `.claude/commands/` as plain markdown files — Claude Code picks them up automatically.
 Use them any time, not just during the initial setup. Run `/god-node-hunter` after a major refactor
 to refresh the god node table. Run `/framework-auditor` when you add a new domain. Run
 `/memory-keeper` when you need MEMORY.md updated without waiting for a commit.
+
+### /domain-agent-builder
+
+Run after `/memory-bootstrapper`. Reads graph communities,
+proposes domain agent groupings, waits for confirmation,
+then creates named agents with real file ownership and
+updates AGENTS.md routing table and dispatcher.prompt.
+This is the step that gives Claude Code real project structure —
+who owns what, what god nodes to protect, what tasks belong where.
 
 ---
 

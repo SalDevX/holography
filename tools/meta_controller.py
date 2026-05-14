@@ -80,8 +80,8 @@ _PATCHES: dict[str, list[list[str]]] = {
     ],
     "parity": [
         [],
-        ["implement feature in all affected views — deliver as single diff"],
-        ["primary view stub: implement fully; add TODO in secondary view with full spec"],
+        ["implement feature in both mobile and desktop views — deliver as single diff"],
+        ["primary view stub: implement fully; add TODO in mobile view with full spec"],
     ],
     "cross_agent": [
         [],

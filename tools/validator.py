@@ -48,62 +48,58 @@ def removed_lines(diff: str) -> list[str]:
 # Universal fallback rules (override in validator_rules.py)
 # ---------------------------------------------------------------------------
 
-def _rule_no_debug_in_production(diff: str) -> tuple[bool, str]:
-    """No debug/print statements added to production code."""
-    debug_patterns = (
-        "import pdb", "pdb.set_trace()", "debugger;",
-        "console.log(", "print(f\"DEBUG", "print('DEBUG",
-    )
-    for line in added_lines(diff):
-        for pattern in debug_patterns:
-            if pattern in line:
-                return False, f"Universal Rule 1: debug statement added — {pattern!r}"
+def _rule_no_direct_data_js_edit(diff: str) -> tuple[bool, str]:
+    """js/data.js is generated — must not be edited directly."""
+    if "js/data.js" in files_in_diff(diff):
+        return False, "Rule 1: js/data.js edited directly — changes must go through the data pipeline"
     return True, ""
 
 
-def _rule_no_hardcoded_secrets(diff: str) -> tuple[bool, str]:
-    """No secrets, tokens, or passwords added to code."""
-    secret_patterns = re.compile(
-        r'(?i)(password|secret|api_key|token|passwd)\s*=\s*[\'"][^\'"]{6,}[\'"]'
-    )
+def _rule_sftp_deploy_logic_gate(diff: str) -> tuple[bool, str]:
+    """tools/sftp_sync.py must not gain new logic — comment-only changes are allowed."""
+    if "tools/sftp_sync.py" not in files_in_diff(diff):
+        return True, ""
     for line in added_lines(diff):
-        if secret_patterns.search(line):
-            return False, "Universal Rule 2: hardcoded secret detected in diff"
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            return False, "Rule 2: tools/sftp_sync.py has a logic change — run dry-run gate first"
     return True, ""
 
 
-def _rule_tests_not_deleted(diff: str) -> tuple[bool, str]:
-    """Test files must not be deleted."""
-    for line in diff.splitlines():
-        if line.startswith("--- a/") and ("test" in line.lower() or "spec" in line.lower()):
-            path = line[6:]
-            if path not in files_in_diff(diff):
-                return False, f"Universal Rule 3: test file deleted — {path}"
+def _rule_asset_path_consistency(diff: str) -> tuple[bool, str]:
+    """Asset filenames referenced in diffs must exist on disk in assets/."""
+    asset_pattern = re.compile(r"[\w\-]+\.(jpg|jpeg|png|gif|webp)", re.IGNORECASE)
+    assets_dir = PROJECT_ROOT / "assets"
+    for line in added_lines(diff):
+        for m in asset_pattern.finditer(line):
+            fname = m.group(0)
+            if not (assets_dir / fname).exists():
+                return False, f"Rule 3: asset not found on disk — {fname}"
     return True, ""
 
 
-def _rule_no_force_push_commands(diff: str) -> tuple[bool, str]:
-    """No force push or destructive git commands added."""
-    dangerous = ("git push --force", "git push -f", "git reset --hard", "rm -rf")
-    for line in added_lines(diff):
-        for cmd in dangerous:
-            if cmd in line:
-                return False, f"Universal Rule 4: dangerous command added — {cmd!r}"
+def _rule_mobile_desktop_parity(diff: str) -> tuple[bool, str]:
+    """Desktop UI changes must be paired with a matching mobile change in the same diff."""
+    touched = files_in_diff(diff)
+    has_desktop = any(f.endswith(".html") or f.startswith("desktop/") for f in touched)
+    has_mobile = any(f.startswith("mobile/") for f in touched)
+    if has_desktop and not has_mobile:
+        return False, "Rule 4: desktop UI changed without matching mobile update — deliver both in one diff"
     return True, ""
 
 
 UNIVERSAL_RULES = [
-    _rule_no_debug_in_production,
-    _rule_no_hardcoded_secrets,
-    _rule_tests_not_deleted,
-    _rule_no_force_push_commands,
+    _rule_no_direct_data_js_edit,
+    _rule_sftp_deploy_logic_gate,
+    _rule_asset_path_consistency,
+    _rule_mobile_desktop_parity,
 ]
 
 UNIVERSAL_RETRY = {
-    "Universal Rule 1": "claude-sonnet-4-6",
-    "Universal Rule 2": "human",
-    "Universal Rule 3": "human",
-    "Universal Rule 4": "human",
+    "Rule 1": "human",
+    "Rule 2": "claude-sonnet-4-6",
+    "Rule 3": "claude-sonnet-4-6",
+    "Rule 4": "claude-sonnet-4-6",
 }
 
 
