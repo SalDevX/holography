@@ -50,6 +50,11 @@
 
 | Date | Commit | What |
 |------|--------|------|
+| 2026-05-15 | 01a6108 | README.md: added interactive graph button to god node section — for-the-badge shield linking to reel-engine graph (1,235 nodes · 2,139 edges · 236 communities) via cdn.cosmic-energy-daily.com |
+| 2026-05-15 | 80f8b35 | docs/examples.md: rewrote real-world example — marta-test polyglot (Python + React + FileMaker); added full AGENTS.md routing table, MEMORY_MAP.md community sections, terminal install output (141 nodes · 238 edges · 9 communities); static fallback block added |
+| 2026-05-15 | e63130c | README.md: tightened god node paragraph — "files—not topology" framing; business impact over graph theory; ends on product value; reel-engine Config (119 edges, 9 communities) retained |
+| 2026-05-14 | 2132758 | README.md: replaced god node example — swapped fmt() (12 edges) for Config (119 edges, 9 communities) from reel-engine; Settings dataclass framing added |
+| 2026-05-14 | 5fddf13 | .claude/commands/commit.md created — /commit slash command installed into project (context-only commit; runs bin/commit -m) |
 | 2026-05-14 | 2360005 | npm/README.md deleted (609 lines); AGENTS.md routing table: added `Edit docs/ (6 files) → agents/memory-keeper.prompt`; MEMORY_MAP.md Community 7 backfilled for docs/ |
 | 2026-05-14 | 0397f07 | README.md cut to ~80 lines; full content split into 6 new docs/ pages: architecture.md, how-it-works.md, examples.md, extending.md, cli.md, philosophy.md (includes known tradeoffs section) |
 | 2026-05-14 | c4e49fb | .claude/settings.local.json: added allowlist entry `git -C ... add npm/cli.js npm/package.json npm/templates.json` to support /commit slash command workflow without permission prompts |

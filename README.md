@@ -30,7 +30,7 @@ Open a fresh session, and an agent sees files — not topology.
 
 `Config` looks harmless: just a settings dataclass.
 
-The graph says otherwise: 119 edges across 9 communities.
+The graph says otherwise: x edges across x communities.
 
 [![explore the reel-engine graph — 1,235 nodes · 2,139 edges](https://img.shields.io/badge/explore%20the%20reel--engine%20graph-1%2C235%20nodes%20·%202%2C139%20edges-6E40C9?style=for-the-badge)](https://cdn.cosmic-energy-daily.com/graph/graph.html)
 
