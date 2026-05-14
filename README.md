@@ -24,7 +24,7 @@ Holography installs the infrastructure that survives restarts: memory files load
 
 ## The non-obvious part: god nodes
 
-Not all functions are equally dangerous to change. graphify runs AST analysis and produces edge counts and betweenness centrality scores. `fmt()` in a real project looks like a trivial formatter — but it has 12 edges, a betweenness score of 0.061, and connects communities 5, 6, 7, and 8. It's a cross-community bridge. A "simple formatting fix" cascades across mobile, desktop, email, and summary views simultaneously. Without the graph, you'd never know.
+Not all functions are equally dangerous to change. graphify runs AST analysis and produces edge counts and betweenness centrality scores. `Config` in reel-engine looks like a settings dataclass — you add a field for a new vertical, rename an attribute, change a default. It has 119 edges and spans 9 communities: pipeline execution, clip fetching, audio sync, keyword generation, video assembly, YouTube publishing, Instagram posting, state tracking, and LLM calls. A rename of a single attribute propagates silently through every stage that reads it. Without the graph, you ship the rename, test the happy path once, and discover three downstream stages were still reading the old key.
 
 Holography injects these nodes into Claude's context before it writes a single line, on every file access.
 
