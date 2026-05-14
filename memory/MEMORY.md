@@ -50,6 +50,8 @@
 
 | Date | Commit | What |
 |------|--------|------|
+| 2026-05-14 | 9a44e52 | npm/cli.js: added /commit slash command template to _writeClaudeCommands(); uses context-only commit (no git reads); bin/commit -m "<summary>"; installed via init + updated via update; bump 1.0.28→1.0.29 |
+| 2026-05-14 | 25bb99e | README.md: rendered AGENTS.md routing table and MEMORY_MAP.md example tables as native GitHub tables; removed raw pipe/markdown fences; added ✓ god-node marker; trimmed global invariants to blockquote |
 | 2026-05-14 | 57480af | npm/cli.js: added _writeCommitScript(), _runUpdate(), _mergeDispatcherRoutes(); bin/commit + bin/commit-jsx-patch templates; holography update command; bump 1.0.26; graph: 64 nodes, 97 edges; _runUpdate() new god node (9 edges) |
 | 2026-05-14 | a2ca249 | agents/tools-engineer.prompt + AGENTS.md: added missing god nodes _rule_mobile_desktop_parity() (3 edges) and _load_project_rules() (3 edges) — both in tools/validator.py; omitted from initial domain-agent build |
 | 2026-05-14 | b34c354 | Created domain agents: agents/cli-engineer.prompt, agents/install-engineer.prompt, agents/tools-engineer.prompt; updated AGENTS.md routing table + dispatcher.prompt ownership map |
