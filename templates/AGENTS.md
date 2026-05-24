@@ -12,10 +12,23 @@
 | ALL tasks — entry point (read first) | `agents/dispatcher.prompt` |
 {{ROUTING_TABLE_ROWS}}
 | Doc sync after commit / MEMORY.md / MEMORY_MAP.md | `agents/memory-keeper.prompt` |
+| Security review — auth, I/O, deps, subprocess | `agents/security-engineer.prompt` |
 | Validate any output before applying to disk | `agents/validator.prompt` |
 | FAIL escalation from any agent — retry loop | `agents/meta-controller.prompt` |
 
 Cross-agent task: read both relevant prompt files. No others.
+
+---
+
+## Memory load policy
+
+| File | Load when | Line budget |
+|------|-----------|-------------|
+| `memory/MEMORY.md` | Every session | ≤70 lines |
+| `memory/MEMORY_MAP.md` | Every session | ≤95 lines |
+| `memory/MEMORY_CHANGELOG.md` | On demand — recent fix context only | unlimited |
+| `memory/MEMORY_INTELLIGENCE.md` | On demand — before touching flagged areas | unlimited |
+| `memory/MEMORY_REFERENCE.md` | On demand — when verifying a spec | unlimited |
 
 ---
 
@@ -26,9 +39,10 @@ Cross-agent task: read both relevant prompt files. No others.
 
 **After every code change:**
 1. `graphify update .`
-2. Update `memory/MEMORY.md` with today's date
-3. Update `memory/MEMORY_MAP.md` if new functions added
-4. `python3 -m pytest tests/smoke_test.py -v` — all tests must pass
+2. `python3 tools/refresh_god_nodes.py` — patches god nodes table in AGENTS.md
+3. Update `memory/MEMORY.md` with today's date
+4. Update `memory/MEMORY_MAP.md` if new functions added
+5. `python3 -m pytest tests/smoke_test.py -v` — all tests must pass
 
 **Agent ownership — apply to every task, every agent:**
 - Each agent may ONLY modify files listed in its `## AGENT OWNERSHIP` block

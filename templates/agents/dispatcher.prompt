@@ -117,6 +117,27 @@ On complex/cross-agent tasks, read `graphify-out/GRAPH_REPORT.md` before routing
 
 ---
 
+## SECURITY REVIEW OVERLAY
+
+Route to `@security-engineer` IN PARALLEL with the primary agent when the touched files include any of:
+- Auth, login, token, session, or permission logic
+- External HTTP calls or webhook handlers
+- File I/O with user-supplied paths
+- `subprocess`, `exec`, `eval`, `os.system` calls
+- New dependencies (package.json, requirements.txt, pyproject.toml)
+- `.env` files or config files containing credential placeholders
+
+When triggered, add to the ROUTE block:
+```
+  security: @security-engineer — parallel review
+  security_prompt: agents/security-engineer.prompt
+```
+
+@security-engineer returns a VERDICT. FAIL verdict holds the diff pending human review.
+PASS/WARN verdicts allow the diff to proceed; WARN findings are logged to `logs/security.log`.
+
+---
+
 ## PER-TASK ROUTING PROTOCOL
 
 @dispatcher is invoked at the start of EVERY task — not just session start.

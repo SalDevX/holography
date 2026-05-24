@@ -1,0 +1,5 @@
+[agents.memory_keeper]
+auto_refresh_god_nodes = true   # run tools/refresh_god_nodes.py after each commit
+
+[validator]
+strict_mode = false             # set true to treat Rule 0 pre-flight as blocking
