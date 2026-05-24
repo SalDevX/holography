@@ -178,9 +178,11 @@ fi
 # ---------------------------------------------------------------------------
 
 log "Step 4/5 — Running graphify..."
-if command -v graphify &> /dev/null; then
+if [ -d "$PROJECT_ROOT/graphify-out" ]; then
+    log "  graphify-out/ already present — skipping (run 'graphify update .' manually to refresh)"
+elif command -v graphify &> /dev/null; then
     cd "$PROJECT_ROOT" && graphify update . 2>&1 | tail -2
-    log "  graphify-out/ updated"
+    log "  graphify-out/ built"
 else
     warn "  graphify not found. Install: pip install graphify-cli"
     warn "  Then run: graphify update ."
