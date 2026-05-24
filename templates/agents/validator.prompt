@@ -25,6 +25,17 @@ No explanation unless `--explain` is appended. No prose. No headers.
 
 ## VALIDATION RULESET
 
+### Rule 0 — Behavioral pre-flight (non-blocking)
+
+Before evaluating any diff rule, confirm:
+- A ROUTE block was emitted before this task began
+- The agent producing this diff is listed in that ROUTE block
+
+This cannot be verified from the diff itself — it is a conversation-context check.
+If no ROUTE block was emitted this session, note it in REASON but do not FAIL on Rule 0 alone.
+
+---
+
 {{VALIDATOR_RULES}}
 
 ---

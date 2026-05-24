@@ -95,6 +95,28 @@ def commit(message: str) -> bool:
     return True
 
 
+def run_tests() -> bool:
+    tests_dir = PROJECT_ROOT / "tests"
+    if not tests_dir.exists():
+        return True
+    print_section("TESTS")
+    r = run(["python3", "-m", "pytest", str(tests_dir), "-q", "--tb=short"])
+    if r.returncode != 0:
+        print("[commit] tests failed — aborting commit", file=sys.stderr)
+        return False
+    return True
+
+
+def refresh_god_nodes() -> None:
+    script = PROJECT_ROOT / "tools" / "refresh_god_nodes.py"
+    if not script.exists():
+        return
+    print_section("GOD NODES")
+    r = run(["python3", str(script)])
+    if r.returncode != 0:
+        print("[commit] refresh_god_nodes failed (non-fatal)", file=sys.stderr)
+
+
 # ── pre-commit build step (injected by holography if JSX/React detected)
 
 
@@ -144,7 +166,11 @@ def main() -> int:
 
     # ── pre-commit build step (injected by holography if JSX/React detected)
 
-    # ── 3. commit message
+    # ── 3. test gate
+    if not run_tests():
+        return 1
+
+    # ── 4. commit message
     message = args.message.strip()
     if not message:
         try:
@@ -157,18 +183,21 @@ def main() -> int:
         print("[commit] empty commit message — aborted", file=sys.stderr)
         return 3
 
-    # ── 4. stage
+    # ── 5. stage
     staged = stage(args.files, args.all_files)
     if staged == 0:
         print("[commit] nothing staged after git add — aborted", file=sys.stderr)
         return 2
 
-    # ── 5. commit
+    # ── 6. commit
     if not commit(message):
         return 1
 
-    # ── 6. graphify (AST only, zero API cost)
+    # ── 7. graphify (AST only, zero API cost)
     graphify_update()
+
+    # ── 8. god-node refresh (no-op if tools/refresh_god_nodes.py absent)
+    refresh_god_nodes()
 
     print("\n[commit] done ✓")
     return 0

@@ -25,7 +25,13 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------------------------
 
 def files_in_diff(diff: str) -> set[str]:
+    """Files present in a diff via --- a/ headers. Does not catch new files (use files_touched_in_diff)."""
     return {m.group(1) for m in re.finditer(r"^--- a/(.+)$", diff, re.MULTILINE)}
+
+
+def files_touched_in_diff(diff: str) -> set[str]:
+    """Files touched in a diff via +++ b/ headers. Includes new files where source side is /dev/null."""
+    return {m.group(1) for m in re.finditer(r"^\+\+\+ b/(.+)$", diff, re.MULTILINE)}
 
 
 def added_lines(diff: str) -> list[str]:
@@ -34,6 +40,20 @@ def added_lines(diff: str) -> list[str]:
         for line in diff.splitlines()
         if line.startswith("+") and not line.startswith("+++")
     ]
+
+
+def added_lines_for_file(diff: str, filename: str) -> list[str]:
+    """Added lines scoped to a specific file's hunks only."""
+    result = []
+    in_file = False
+    for line in diff.splitlines():
+        if line.startswith("+++ b/"):
+            in_file = line[6:] == filename
+        elif line.startswith("--- ") or line.startswith("+++ "):
+            pass
+        elif in_file and line.startswith("+"):
+            result.append(line[1:])
+    return result
 
 
 def removed_lines(diff: str) -> list[str]:
@@ -80,7 +100,7 @@ def _rule_asset_path_consistency(diff: str) -> tuple[bool, str]:
 
 def _rule_mobile_desktop_parity(diff: str) -> tuple[bool, str]:
     """Desktop UI changes must be paired with a matching mobile change in the same diff."""
-    touched = files_in_diff(diff)
+    touched = files_touched_in_diff(diff)
     has_desktop = any(f.endswith(".html") or f.startswith("desktop/") for f in touched)
     has_mobile = any(f.startswith("mobile/") for f in touched)
     if has_desktop and not has_mobile:
@@ -123,7 +143,9 @@ def _load_project_rules() -> tuple[list, dict]:
 
     # Expose helpers so validator_rules.py can import them
     mod.files_in_diff = files_in_diff
+    mod.files_touched_in_diff = files_touched_in_diff
     mod.added_lines = added_lines
+    mod.added_lines_for_file = added_lines_for_file
     mod.removed_lines = removed_lines
     mod.PROJECT_ROOT = PROJECT_ROOT
 

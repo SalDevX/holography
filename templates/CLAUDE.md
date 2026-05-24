@@ -8,6 +8,17 @@ Before any task, read in order:
 
 Read `graphify-out/GRAPH_REPORT.md` only when tracing unknown cross-file dependencies.
 
+## Before Every Task
+
+A task is any user message that produces a code read, proposal, or diff — including "go", "ok", "continue", and follow-up corrections within the same session.
+
+**Required before every task — not just session start:**
+- Read `agents/dispatcher.prompt`
+- Emit a ROUTE block
+- Read ONLY the agent prompt(s) named in the ROUTE block
+
+Routing from a previous task does not carry forward. Each task gets a fresh ROUTE block.
+
 ## Before Applying Any Diff
 
 Run `agents/validator.prompt` rules for all touched files
